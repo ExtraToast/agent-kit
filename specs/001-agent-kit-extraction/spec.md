@@ -12,7 +12,7 @@ Distribution intent: this repository is consumed by personal-stack and optionall
 
 1. A consumer maintainer pins ExtraToast/agent-kit to a released version, renders repo-local `.claude`, `.codex`, and `.agents` surfaces, and commits the generated result with provenance that identifies the kit version.
 2. A consumer CI run compares committed surfaces with the pinned kit render and fails when any generated skill, hook, setting, council asset, KB hook, or installer entrypoint differs.
-3. A kit maintainer changes a managed surface, updates the manifest, and verifies that both supported agent surfaces stay in parity or that any intentional gap has an explicit unsupported reason.
+3. A kit maintainer changes a managed surface, updates the manifest, and verifies that all supported agent surfaces stay in parity or that any intentional gap has an explicit unsupported reason.
 4. A runtime operator downloads `/install.sh` from the KB service and receives a shell script whose version and KB URL match the running service while containing no bearer token or other secret.
 5. A downstream repository receives a Renovate update for a newer kit version and can review the generated surface diff without changing personal-stack release semantics.
 
@@ -29,7 +29,7 @@ Distribution intent: this repository is consumed by personal-stack and optionall
 - FR-9: `--doctor` must remain read-only and report static render drift, manifest version state, parity state, and KB reachability state when configured.
 - FR-10: The kit manifest must pin every managed skill, hook, hook setting, council asset, KB hook, Spec Kit seed, and installer entrypoint that belongs to the kit contract.
 - FR-11: The manifest must record checksums or equivalent stable integrity signals for managed files so CI can detect unreviewed drift.
-- FR-12: Shared capabilities must maintain parity across the two supported agent surfaces unless the manifest records an explicit unsupported reason for a specific gap.
+- FR-12: Shared capabilities must maintain parity across all supported agent surfaces unless the manifest records an explicit unsupported reason for a specific gap.
 - FR-13: Council orchestration assets must be represented as a first-class managed bundle covering the driver, prompts, schemas, default configuration, and user-facing skill entrypoints.
 - FR-14: KB hooks and KB-oriented skills must be represented as managed kit surfaces and must be available to every supported agent surface unless explicitly unsupported.
 - FR-15: Consumer CI must fail with a non-zero status when committed generated surfaces do not match the pinned kit version.
@@ -53,7 +53,7 @@ Distribution intent: this repository is consumed by personal-stack and optionall
 - SC-6: `--output` can render to an empty temporary directory and leaves the consumer worktree unchanged.
 - SC-7: `--doctor` exits non-zero for static drift and reports a warning or failure for unavailable KB reachability according to its configured strictness.
 - SC-8: The manifest accounts for 100 percent of managed skills, hooks, settings, council assets, KB hooks, Spec Kit seeds, and installer entrypoints.
-- SC-9: Every shared capability has entries for both supported agent surfaces, or exactly one explicit unsupported reason is present for each intentional gap.
+- SC-9: Every shared capability has entries for all supported agent surfaces, or exactly one explicit unsupported reason is present for each intentional gap.
 - SC-10: A request to `/install.sh` returns HTTP 200 with a shell-script content type.
 - SC-11: The `/install.sh` response contains no unresolved `@VERSION@` or `@KB_URL@` placeholders.
 - SC-12: The `/install.sh` response contains the configured KB URL and a service version value for the running service.
