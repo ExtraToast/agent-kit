@@ -76,14 +76,16 @@ specs/003-round4-agent-runner-runtime-packaging/
 | FR-006 | `entrypoint.sh` `REPO_URL`, `REPO_BRANCH`, `REPO_URLS` handling. |
 | FR-007 | Runtime `bin/` helper scripts. |
 | FR-008 | Runtime `mcp/` profiles and placeholder validation. |
-| FR-009 | `scripts/validate_manifest.py` runtime artifact validation. |
+| FR-009 | `scripts/validate_manifest.py` default offline runtime artifact validation. |
 | FR-010 | Round 3 handoff fixture validation remains non-deployable. |
+| FR-011 | `scripts/validate_manifest.py --runtime-selftest` opt-in credential helper token probe. |
 
 ## Validation Plan
 
 - `python3 render-agent-kit.py --check`
 - `python3 render-agent-kit.py --doctor`
 - `python3 scripts/validate_manifest.py`
+- `python3 scripts/validate_manifest.py --runtime-selftest` for runtime-only credential helper token probing
 - `python3 -m compileall render-agent-kit.py scripts council`
 - `ruff check .`
 - `bash -n` on rendered runtime shell scripts through the validator

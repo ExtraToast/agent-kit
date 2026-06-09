@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import importlib.util
 import json
@@ -23,6 +24,7 @@ except ModuleNotFoundError as exc:  # pragma: no cover - exercised in CI setup f
 
 
 ROOT = Path(__file__).resolve().parents[1]
+RUNTIME_SELFTEST_ENV = "AGENT_RUNTIME_SELFTEST"
 MANIFEST_PATH = ROOT / "manifest.yaml"
 ROUND3_SKELETON_DIR = ROOT / "runner-manifests"
 ROUND3_SPEC_DIR = ROOT / "specs" / "002-round3-agent-runner-manifests"
@@ -461,7 +463,23 @@ def run_checked(command: list[str], env: dict[str, str] | None = None, input_tex
     return completed.stdout
 
 
-def validate_runtime_shell_contracts() -> None:
+def validate_git_credential_preseeded_token(
+    runtime_dir: Path,
+    env: dict[str, str],
+    *,
+    expected_token: str = "preseeded-token",
+) -> None:
+    credential = runtime_dir / "bin" / "git-credential-agent-gh-app"
+    credential_output = run_checked(
+        ["bash", str(credential), "get"],
+        env={**env, "REPO_ALLOW": "owner/repo"},
+        input_text="protocol=https\nhost=git-host\npath=owner/repo.git\n\n",
+    )
+    if f"password={expected_token}" not in credential_output:
+        fail("git credential helper did not return a preseeded token for an allowed repo")
+
+
+def validate_runtime_shell_contracts(*, runtime_selftest: bool = False) -> None:
     runtime_dir = ROOT / "runner-manifests" / "runtime"
     entrypoint = runtime_dir / "entrypoint.sh"
     run_checked(["sh", "-n", str(entrypoint)])
@@ -527,17 +545,27 @@ def validate_runtime_shell_contracts() -> None:
         if slug != "owner/repo":
             fail(f"agent-github-token --print-slug returned {slug!r}")
 
-        credential = runtime_dir / "bin" / "git-credential-agent-gh-app"
-        credential_output = run_checked(
-            ["bash", str(credential), "get"],
-            env={**env, "REPO_ALLOW": "owner/repo", "GH_TOKEN": "preseeded-token"},
-            input_text="protocol=https\nhost=git-host\npath=owner/repo.git\n\n",
-        )
-        if "password=preseeded-token" not in credential_output:
-            fail("git credential helper did not return a preseeded token for an allowed repo")
+        if runtime_selftest:
+            validate_git_credential_preseeded_token(runtime_dir, {**env, "GH_TOKEN": "preseeded-token"})
 
 
-def main() -> int:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Validate the agent-kit manifest against checked-in sources.")
+    parser.add_argument(
+        "--runtime-selftest",
+        action="store_true",
+        help="also run runtime-only credential helper token self-tests",
+    )
+    return parser.parse_args(argv)
+
+
+def runtime_selftest_enabled(args: argparse.Namespace) -> bool:
+    return args.runtime_selftest or os.environ.get(RUNTIME_SELFTEST_ENV) == "1"
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
+    runtime_selftest = runtime_selftest_enabled(args)
     try:
         manifest = load_manifest()
         validate_artifact(manifest)
@@ -548,13 +576,14 @@ def main() -> int:
         validate_installer(manifest)
         validate_runtime_package_manifest(manifest)
         validate_runtime_package_artifacts()
-        validate_runtime_shell_contracts()
+        validate_runtime_shell_contracts(runtime_selftest=runtime_selftest)
         validate_round3_skeleton()
     except AssertionError as exc:
         print(f"manifest validation failed: {exc}", file=sys.stderr)
         return 1
 
-    print("manifest validation passed")
+    suffix = " with runtime self-tests" if runtime_selftest else ""
+    print(f"manifest validation passed{suffix}")
     return 0
 
 

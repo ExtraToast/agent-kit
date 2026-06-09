@@ -25,9 +25,12 @@
 - [x] T010 [FR-003] Add runtime template root, managed paths, and checksums to
   `manifest.yaml`.
 - [x] T011 [FR-009] Extend manifest validation for runtime package YAML,
-  profile parsing, helper executability, shell syntax, and self-tests.
+  profile parsing, helper executability, shell syntax, and offline self-tests.
 - [x] T012 [FR-004, FR-010] Preserve skeleton guardrails for concrete values and
   deployable Kubernetes resource kinds.
+- [x] T018 [FR-011] Gate git credential helper token probing behind
+  `--runtime-selftest` or `AGENT_RUNTIME_SELFTEST=1` and cover it with a mocked
+  helper unit test.
 
 ## Phase 4: Verification
 
@@ -36,6 +39,7 @@
 - [x] T015 [SC-003] Run `python3 scripts/validate_manifest.py`.
 - [x] T016 [SC-004] Run `python3 -m compileall render-agent-kit.py scripts council`.
 - [x] T017 [SC-005] Run `ruff check .` if available locally.
+- [x] T019 [SC-006] Run `python3 scripts/validate_manifest.py --runtime-selftest`.
 
 ## Dependencies
 

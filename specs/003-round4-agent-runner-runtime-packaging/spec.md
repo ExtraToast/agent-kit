@@ -44,7 +44,10 @@ markers, derive repository allow-lists, seed Spec Kit into cloned repositories,
 and configure Claude/Codex MCP profiles.
 
 **Independent Test**: Run the local entrypoint self-tests through
-`scripts/validate_manifest.py`; no network or container build is required.
+`scripts/validate_manifest.py`; no network, credential helper token, or
+container build is required for default validation. Runtime-only credential
+helper token probing is opt-in with `--runtime-selftest` or
+`AGENT_RUNTIME_SELFTEST=1`.
 
 **Acceptance Scenarios**:
 
@@ -104,8 +107,12 @@ kinds and Kubernetes API versions remain rejected in the handoff fixtures.
   by environment variables.
 - **FR-008**: MCP profiles MUST be rendered as Claude JSON and Codex TOML files
   with endpoint and bearer placeholders only.
-- **FR-009**: Validation MUST parse runtime package YAML, MCP JSON, and MCP
-  TOML, and MUST run local shell syntax/self-test checks.
+- **FR-009**: Default validation MUST parse runtime package YAML, MCP JSON, and
+  MCP TOML, and MUST run offline local shell syntax/self-test checks without
+  requiring a configured git credential helper or preseeded repository token.
+- **FR-011**: Runtime credential helper token probing MUST remain available as
+  an explicit runtime self-test selected with `--runtime-selftest` or
+  `AGENT_RUNTIME_SELFTEST=1`.
 - **FR-010**: Cluster deployment concerns MUST remain contract-only:
   namespace, RBAC, storage, scheduling, network policy, secret projection,
   Flux/Kustomize/Helm manifests, and Kubernetes resources are out of scope.
@@ -131,12 +138,16 @@ kinds and Kubernetes API versions remain rejected in the handoff fixtures.
 - **SC-002**: `python3 render-agent-kit.py --doctor` passes without requiring
   live KB access.
 - **SC-003**: `python3 scripts/validate_manifest.py` validates runtime package
-  checksums, profile parsing, shell syntax, self-tests, placeholders, and
-  non-deployable handoff fixtures.
+  checksums, profile parsing, shell syntax, offline self-tests, placeholders,
+  and non-deployable handoff fixtures without requiring a credential helper
+  token.
 - **SC-004**: `python3 -m compileall render-agent-kit.py scripts council`
   passes.
 - **SC-005**: `ruff check .` passes where the local ruff executable is
   available.
+- **SC-006**: `python3 scripts/validate_manifest.py --runtime-selftest` keeps
+  the preseeded git credential helper probe available for runtime-oriented
+  validation.
 
 ## Assumptions
 
