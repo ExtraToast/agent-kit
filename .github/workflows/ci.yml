@@ -39,10 +39,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Actionlint
-        uses: rhysd/actionlint@v1
-        with:
-          args: .github/workflows/*.yml
+      - name: Download actionlint
+        id: actionlint
+        shell: bash
+        run: bash <(curl --fail --silent --show-error --location https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+
+      - name: Lint GitHub Actions workflows
+        shell: bash
+        run: "${{ steps.actionlint.outputs.executable }}" -color .github/workflows/*.yml
 
   render-check:
     name: Renderer Check
