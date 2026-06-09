@@ -13,6 +13,10 @@ as `ClassPathResource("installer/install.sh")`.
 - `templates/repo/`: sources for checked-in `.claude`, `.codex`, `.agents`,
   and `.specify` surfaces.
 - `templates/installer/`: installer template and partials.
+- `templates/runner-runtime/`: sources for portable agent-runner runtime
+  packaging artifacts.
+- `runner-manifests/`: runtime package artifacts and non-deployable platform
+  handoff fixtures.
 - `installer/install.sh`: generated serving artifact with `@VERSION@` and
   `@KB_URL@` placeholders.
 - `council/`: council driver, prompts, schemas, and default config.
